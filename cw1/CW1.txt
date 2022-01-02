@@ -1,0 +1,8 @@
+Klim Yadrintsev CW1
+
+1. What are the results for 217 & 114?
+Output: The answer is 1 and it took 16 steps to calculate
+2. What are the results for 64507 & 265224?
+Output: The answer is 3 and it took 33 steps to calculate
+3. What are the results for 1512 & 7818?
+Output: The answer is 6 and it took 22 steps to calculate
