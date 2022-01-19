@@ -119,6 +119,7 @@ class Portfolio {
 
     vector<Position> Positions;
     
+    
     public:
 
     Portfolio(vector<Position> positions);
@@ -130,7 +131,7 @@ class Portfolio {
          Positions.push_back(pos);
     };
 
-    double getValue(double spot) {
+    virtual double getValue(double spot) {
         double sum_of_elems = 0.0;
         for (auto it = Positions.begin(); it != Positions.end(); ++it) {
         // for (std::vector<Position>::iterator& it = Positions.begin(); it != Positions.end(); ++it) {
@@ -150,11 +151,47 @@ class Portfolio {
     };
 
     double calcDailyVaR(double spot, double sigma, double riskFreeRate, int N) {
-        
+        double dt = 1.0/252.0;
+        double vol = sqrt(dt) * sigma;
+        double drift = dt*(riskFreeRate - 0.5*vol*vol);
+        vector<double> vals;
+
+        for (int i = 0; i < N; i++) {
+            double spot_new = spot * exp(drift + vol*simStandardNormal());
+            vals[i] = getValue(spot_new);
+        };
+
+        sort(vals.begin(), vals.end());
+
+        return getValue(spot) - (vals[0.05 * N -1]);
+
+        /*
+        for the specified number of iterations N:
+            calculate a new spot value as:
+            spot_new = spot * exp(drift + vol*standardNormalRandomVariable)
+            calculate the portfolio value for spot_new
+            store the portfolio value in a vector called vals
+
+        */
+
     };
 
     double calcDailyExpectedShortfall(double spot, double sigma, double riskFreeRate, int N) {
+        double dt = 1.0/252.0;
+        double vol = sqrt(dt) * sigma;
+        double drift = dt*(riskFreeRate - 0.5*vol*vol);
+        vector<double> vals;
 
+        for (int i = 0; i < N; i++) {
+            double spot_new = spot * exp(drift + vol*simStandardNormal());
+            vals[i] = getValue(spot_new);
+        };
+
+        sort(vals.begin(), vals.end());
+
+        double sum_vals = std::accumulate(vals.begin(), vals.end(), 0);
+
+        return getValue(spot) - ((1 / (0.05 * N))*(sum_vals));
     };
 };
 

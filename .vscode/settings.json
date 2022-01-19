@@ -64,6 +64,8 @@
         "utility": "cpp",
         "vector": "cpp",
         "list": "cpp",
-        "*.cp": "cpp"
+        "*.cp": "cpp",
+        "__tree": "cpp",
+        "map": "cpp"
     }
 }
