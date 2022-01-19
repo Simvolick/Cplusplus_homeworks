@@ -10,8 +10,18 @@
 #include <cmath>
 #include <iomanip>
 
+#include <ctime>
+#include <list>
+#include <numeric>
+#include <algorithm>
+#include <vector>
+#include <array>
+#include <map>
+
 
 using namespace std;
+
+
 
 const bool debug = false;
 
@@ -24,8 +34,113 @@ double genUniformRand() {
 
 
 /*
+  My Random generator algorithm.
+*/
+
+// To generate random number
+// between x and y ie.. [x, y]
+int getRandom(int x, int y)
+{
+    srand(time(NULL));
+    return (x + rand() % (y-x+1));
+}
+ 
+// A recursive randomized binary search function.
+// It returns location of x in
+// given array arr[l..r] is present, otherwise -1
+int randomizedBinarySearch(int arr[], int l,
+                            int r, int x)
+{
+    if (r >= l)
+    {
+        // Here we have defined middle as
+        // random index between l and r ie.. [l, r]
+        int mid = getRandom(l, r);
+ 
+        // If the element is present at the
+        // middle itself
+        if (arr[mid] == x)
+            return mid;
+ 
+        // If element is smaller than mid, then
+        // it can only be present in left subarray
+        if (arr[mid] > x)
+          return randomizedBinarySearch(arr, l,
+                                    mid-1, x);
+ 
+        // Else the element can only be present
+        // in right subarray
+        return randomizedBinarySearch(arr, mid+1,
+                                         r, x);
+    }
+ 
+    // We reach here when element is not present
+    // in array
+    return -1;
+
+}
+
+
+/*
   IMPLEMENT YOUR Car AND  Driver CLASSES  HERE
 */
+class Car {
+  protected:
+    double TireWear;
+
+  public:
+  	Car() {     // Constructor
+      TireWear = 1.0;
+    }
+    double getTireWear()  {
+      return TireWear;
+    }
+	void setTireWear(double tw) {
+      TireWear = tw;
+    }
+};
+
+
+class Driver {
+  protected:
+    Car* MyCar;
+	double Speed;
+	double TireWearThreshold;
+	bool HasPitted;
+
+  public:
+  	Driver(Car* car, double speed, double tirewear_threshold) {     // Constructor
+	  MyCar = car;
+	  Speed = speed;
+	  TireWearThreshold = tirewear_threshold;
+	  HasPitted = false;
+    }
+
+	double getHasPitted()  {
+      return HasPitted;
+    }
+	void setHasPitted(bool pitted) {
+      HasPitted = pitted;
+    }
+	double getSpeed()  {
+      return Speed;
+    }
+	void setSpeed(double s) {
+      Speed = s;
+    }
+	Car* getCar()  {
+      return MyCar;
+    }
+	void setCar(Car* c) {
+      MyCar = c;
+    }
+	double getTireWearThreshold()  {
+      return TireWearThreshold;
+    }
+	void setTireWearThreshold(double twt) {
+      TireWearThreshold = twt;
+    }
+};
 
 
 
@@ -244,6 +359,11 @@ double runTestRace(Race* race, int iterations) {
 
 }
 
+// This is a "functor", a class object that acts like a function with state
+
+
+
+
 
 /*
 * The main() function for the program.  Make sure to include a screenshot of program execution with your assignment submission.
@@ -255,24 +375,92 @@ int main() {
 	Car car1;
 	Car car2;
 
-	// the constructor for a Driver takes a pointer to a Car and Speed and TireWearThreshold parameters 
+
+	// double arr[100];
+    // int n = sizeof(arr)/ sizeof(arr[0]);
+    // int x = 10;
+    // int result = randomizedBinarySearch(arr, 0, n-1, x);
+	
+
+	/* Possible way to integrate search
+	std::vector<double, 0.75> possibilities(SIZE);
+	for (int i = 0; i < SIZE; i++)
+	{
+		possibilities[i] = i;
+	}
+	std::iota(speed_array.begin(), speed_array.end(), 0.25);
+	double speed_array[] = std::range(0.25, 0.75);
+	*/
+
+
+	// the constructor for a Driver takes a pointer to a Car and Speed and TireWearThreshold parameters
+	double speed_1 = 0.8;
+	double tw_1 = 0.25;
+	// std::map<double, double> d1_wins_speed;
+	double d1_wins_speed[10] = {};
+	double d1_wins_tw[100] = {};
+	double d1_speeds[10] = {};
+	double d1_tws[100] = {};
+
+	for (int i = 0; i < 10; i++) {
+		speed_1 += 0.02;
+		d1_speeds[i] = speed_1;
+		Driver d1(&car1, speed_1, tw_1);
+		Driver d2(&car2, 1.0, 0.7);
+
+		Race race(100, 50, 20, &d1, &d2);
+
+		d1_wins_speed[i] = runTestRace(&race, 10000);
+			for (int i = 0; i < 10; i++) {
+				tw_1 += 0.005;
+				d1_tws[i] = tw_1;
+				Driver d1(&car1, speed_1, tw_1);
+				Driver d2(&car2, 1.0, 0.5);
+
+				Race race(100, 50, 20, &d1, &d2);
+
+				d1_wins_tw[i] = runTestRace(&race, 10000);
+			}
+	};
+	/*
 	Driver d1(&car1, 1.0, 0.5);
 	Driver d2(&car2, 1.0, 0.5);
 
 	Race race(100, 50, 20, &d1, &d2);
 
-	double d1_wins = runTestRace(&race, 100000);
+	double d1_wins[1];
+	d1_wins[0] = runTestRace(&race, 100000);
+	*/
+
+	// int n = sizeof(arr)/ sizeof(arr[0]);
+    // int x = 10;
+    // int result = randomizedBinarySearch(arr, 0, n-1, x);
+	
 
 	// This should print a number like +/- 0.003   (I get 0.00270411 but your value may be different)
 	// Notice that the two drivers have equivalent speed & threshold parameters but you do not get 0 as the average win time.
 	// This is because we are running a simulation and there is always some random variation in results.  If we set
 	// the number of iterations to something very high, then d1_wins should get close to 0.
-	cout << "EVEN TEST " << d1_wins << endl;
+	int count = 10;
+	int i;
+	double max;
+	max = d1_wins_speed[0];
+    // search num in inputArray from index 0 to elementCount-1 
+    for(i = 0; i < count; i++){
+        if(d1_wins_speed[i] > max){
+            max = d1_wins_speed[i];
+        }
+    };
+
+	int x = std::distance(d1_wins_speed, std::find(d1_wins_speed, d1_wins_speed + 5, max));
+ 
+    // cout  << "Minimum Element\n" << endl << x << "What" << max << endl;
+	cout << "EVEN TEST" << d1_wins_speed[0] << d1_wins_tw[0] << endl;
 
 
 
-	double ideal_speed = -1;   
-	double ideal_threshold = -1;
+	double ideal_speed = d1_speeds[x];   
+	double ideal_threshold = 0.5;
 	/*
 	* 
 	*  IMPLEMENT YOUR SEARCH FOR AN IDEAL SET OF PARAMETERS HERE.

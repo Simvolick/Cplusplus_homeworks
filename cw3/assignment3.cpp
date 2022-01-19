@@ -31,20 +31,25 @@
 #include <cmath>
 #include <iomanip>
 
+#include <algorithm>
+using namespace std;
+
+
 /*
 simStandardNormal() - a helper function that calculates a pseudo-random standard normal gaussian
 */
+
 double simStandardNormal() {
 	static std::mt19937 mt_rand(12345);
 	static std::normal_distribution<double> dis_normal(0.0, 1.0);
 
 	return dis_normal(mt_rand);
-}
+};
 
 double normalCDF(double x) // Phi(-infinity, x) aka N(x)
 {
 	return std::erfc(-x / std::sqrt(2)) / 2;
-}
+};
 
 
 class EuroCallOption {
@@ -57,32 +62,57 @@ public:
 
 public:
 	// This is a constructor.  We will cover constructors in a later lecture
-	EuroCallOption(double k, double sigma, double r, double T) : K(k), Sigma(sigma), r(r), T(T) {}
+	EuroCallOption(double k, double sigma, double r, double T) : K(k), Sigma(sigma), r(r), T(T) {};
 
 
 	double getIntrinsicValue(double spot) {
-		/**
-		* ADD YOUR CODE HERE
-		*/
-	}
+		double intrinsicValue = max((spot - (this->K)), 0.0);
+		return intrinsicValue;
+	};
 
 	double simulatePath(double spot, int steps) {
-		/**
-		* ADD YOUR CODE HERE
-		*/
+		double return_final;
+		for (int i = 0; i < steps; i++) {
+			double drift = ((this -> r) - 0.5 * ((this -> Sigma) * (this -> Sigma))) * ((this -> T) / i);
+			double vol = ((this -> Sigma) * std::sqrt(((this -> T) / steps)));
+			return_final += (drift + (vol * simStandardNormal()));
+		};
+		return return_final;
 	}
+
+	// double estimateValue(double spot, int steps, int N) {
+	// 	double sum=0.0, average;
+	// 	double simulatedPaths[N];
+	// 	double intrinsticValues[N];
+	// 	double discountValue;
+	// 	for (int i = 0; i < N; i++) {
+	// 		simulatedPaths[i] += simulatePath(spot, steps);
+	// 		intrinsticValues[i] += getIntrinsicValue(simulatedPaths[i]);
+	// 		for(int z = 0; z < N; z++)
+	// 			{
+	// 				sum += intrinsticValues[z];
+	// 			};
+	// 		average = sum / N;
+	// 		double discountValue = exp(-average * (this -> T));
+	// };
+	// 	return discountValue;
+	// }
 
 	double estimateValue(double spot, int steps, int N) {
-		/**
-		* ADD YOUR CODE HERE
-		*/
-	}
+		double endingVal = 0,intrinsicVal = 0;
+		for(int i = 0; i < N; ++i){
+			endingVal = simulatePath(spot,steps);
+			intrinsicVal += getIntrinsicValue(endingVal);
+			}
+		return (intrinsicVal / N) * exp(-r * T);
+}
 
 	double calculateBlackScholes(double spot) {
-		/**
-		* ADD YOUR CODE HERE
-		*/
-	}
+		double d1 =  ((log(spot/(this ->K)) + (((this -> r) + (0.5*(pow(this->Sigma,2.0))))*(this->T)))/((this-> Sigma)*(pow((this -> T),0.5))));
+		double d2 = (d1 - (this-> Sigma*(pow(this -> T,0.5))));
+		double blackScholesResult = ((normalCDF(d1) * spot) - (normalCDF(d2) * ((this->K) * exp(-(this->r)*(this->T)))));
+		return blackScholesResult;
+	};
 };
 
 
@@ -94,9 +124,9 @@ void runTest(double S, double K, double sigma, double r, double T, int steps) {
 	double simV100 = call.estimateValue(S, steps, 100);
 	double simV1000 = call.estimateValue(S, steps, 1000);
 	double simV10000 = call.estimateValue(S, steps, 10000);
-	double simV100000 = call.estimateValue(S, steps, 1000000);
+	// double simV100000 = call.estimateValue(S, steps, 1000000);
 
-	std::cout << "S: " << S << " steps: " << steps << " BS: " << BS << " SIM VALUES  " << simV10 << " " << simV100 << " " << simV1000 << " " << simV10000 << " " << simV100000 << std::endl;
+	std::cout << "S: " << S << " steps: " << steps << " BS: " << BS << " SIM VALUES  " << simV10 << " " << simV100 << " " << simV1000 << " " << simV10000 << " " << std::endl;
 
 }
 
