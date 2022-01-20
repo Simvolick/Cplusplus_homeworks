@@ -476,3 +476,5 @@ int main() {
 
 	return 0;
 }
+
+// "/Volumes/ExtremePro/Coding/pre-program/c++/cw5_copy/" && g++ -std=c++11 option.cpp -o option && /Volumes/ExtremePro/Coding/pre-program/c++/cw5_copy/assignment5.cp 

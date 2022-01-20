@@ -7,8 +7,8 @@
 #include <vector>
 using namespace std;
 
-#ifndef option_header
-#define option_header
+#ifndef OPTION_H
+#define OPTION_H
 
 /*
 class EuroCallOption {
